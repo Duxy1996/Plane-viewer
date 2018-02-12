@@ -37,9 +37,9 @@ function readTextFile(file)
     rawFile.send(null);
 }
 
-readTextFile("file:///C:/Users/Carlos/Documents/GitHub/Plane_viewer/flight/6W703-106596d0.kml");
+//readTextFile("file:///C:/Users/Duxyb/Documents/GitHub/Plane_viewer/flight/6W703-106596d0.kml");
 
-function get_data(flight){
+function get_data(flight){    
   flight = flight.replace(/\//g,"");
   flight = flight.replace(/<Point>/g,"");
   flight = flight.replace(/<Placemark>/g,"");
@@ -75,6 +75,8 @@ function get_data(flight){
   flight = flight.replace(/ffffffff/g,"");
   flight = flight.replace(/<coordinates>/g,"");
   flight = flight.replace(/<name>/g,"");
+  flight = flight.replace(/\n/g,"");
+  console.log(flight);
   flight = flight.split("![CDATA[");
   var i = 0;
   tramited_flight = [];
@@ -84,17 +86,16 @@ function get_data(flight){
     test = test.replace(/<description></g,"");
     test = test.replace(/]]><description>/g,"");
     test = test.replace(/f*/g,"");
-    test = test.split("\n");
+    test = test.split("\r");
     test = test.filter(function(a){return a !== ""});
-    if(test.length == 8) {
+    if(test.length == 8){
       tramited_flight.push(test);
+      console.log(test);
     }
+    
   }
   return tramited_flight;
 }
-
-console.log(sceneEl);
-
 
 function add_sphere(x,y,z){
   sceneEl = document.querySelector('a-scene');
@@ -109,7 +110,7 @@ function add_sphere(x,y,z){
 }
 
 setTimeout(
-  function(){
+  function(){    
     for(i = 0; i < flight.length; i++){
       pos = flight[i][6].split(",");
       alt = flight[i][0].replace(/,/g,"");
@@ -117,4 +118,14 @@ setTimeout(
     }
 
 }
-,500)
+,1000)
+
+var exampleSocket = new WebSocket("ws://localhost:8080","TPC");
+exampleSocket.onopen = function (event) {
+  exampleSocket.send("Here's some text that the server is urgently awaiting!"); 
+};
+exampleSocket.onmessage = function (event) {  
+  var flight_a = event.data;
+  //console.log(flight_a);
+  flight = get_data(flight_a);
+}
