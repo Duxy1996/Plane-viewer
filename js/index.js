@@ -18,28 +18,7 @@ function up_down(event) {
 
 }
 
-function readTextFile(file)
-{
-    var rawFile = new XMLHttpRequest();
-    rawFile.open("GET", file, false);
-    rawFile.onreadystatechange = function ()
-    {
-        if(rawFile.readyState === 4)
-        {
-            if(rawFile.status === 200 || rawFile.status == 0)
-            {
-                var allText = rawFile.responseText;
-                flight = allText;
-                flight = get_data(flight)
-            }
-        }
-    }
-    rawFile.send(null);
-}
-
-//readTextFile("file:///C:/Users/Duxyb/Documents/GitHub/Plane_viewer/flight/6W703-106596d0.kml");
-
-function get_data(flight){    
+function get_data(flight){
   flight = flight.replace(/\//g,"");
   flight = flight.replace(/<Point>/g,"");
   flight = flight.replace(/<Placemark>/g,"");
@@ -76,7 +55,7 @@ function get_data(flight){
   flight = flight.replace(/ffffffff/g,"");
   flight = flight.replace(/<coordinates>/g,"");
   flight = flight.replace(/<name>/g,"");
-  //flight = flight.replace(/\n/g,"");  
+  flight = flight.replace(/\n/g,"");
   flight = flight.split("![CDATA[");
   var i = 0;
   tramited_flight = [];
@@ -86,12 +65,11 @@ function get_data(flight){
     test = test.replace(/<description></g,"");
     test = test.replace(/]]><description>/g,"");
     test = test.replace(/f*/g,"");
-    test = test.split("\n");
-    test = test.filter(function(a){return a !== ""});    
+    test = test.split("\r");
+    test = test.filter(function(a){return a !== ""});
     if(test.length == 8){
       tramited_flight.push(test);
     }
-    
   }
   return tramited_flight;
 }
@@ -100,7 +78,7 @@ function add_sphere(x,y,z){
   sceneEl = document.querySelector('a-scene');
   var sphere = document.createElement('a-sphere');
   sphere.setAttribute('geometry', {
-    radius:1
+    radius:0.01
   });
   sphere.setAttribute('position', {x: x, y: y, z: z});
   sphere.setAttribute('material', 'color', '#C6B566');
@@ -109,22 +87,44 @@ function add_sphere(x,y,z){
 }
 
 setTimeout(
-  function(){    
+  function(){
     for(i = 0; i < flight.length; i++){
       pos = flight[i][6].split(",");
       alt = flight[i][0].replace(/,/g,"");
-      add_sphere((pos[0]-37)*800 - 800,alt/200,(pos[1]-55)*800 -300);
+      //add_sphere((pos[0]-37)*800 - 800,alt/200,(pos[1]-55)*800 -300);
+      var ii = pos[0];
+      var j = pos[1];
+      var xx = Math.cos(j/180*Math.PI) * Math.cos(ii/180*Math.PI);
+      var yy = Math.sin(j/180*Math.PI);
+      var zz = Math.cos(j/180*Math.PI) * Math.sin(ii/180*Math.PI);
+      add_sphere(xx*10,yy*10,zz*10);
     }
 
 }
-,1000)
+,800)
 
 var exampleSocket = new WebSocket("ws://localhost:8080","TPC");
 exampleSocket.onopen = function (event) {
-  exampleSocket.send("Here's some text that the server is urgently awaiting!"); 
+  exampleSocket.send("Here's some text that the server is urgently awaiting!");
 };
-exampleSocket.onmessage = function (event) {  
+exampleSocket.onmessage = function (event) {
   var flight_a = event.data;
   //console.log(flight_a);
   flight = get_data(flight_a);
 }
+
+/*
+setTimeout(
+function sphere_set(){
+  for(i = 0; i < 360; i = i + 10){
+    for(j = -90; j <= 90; j = j + 10){
+      var xx = Math.cos(j/180*Math.PI) * Math.cos(i/180*Math.PI);
+      var yy = Math.sin(j/180*Math.PI);
+      var zz = Math.cos(j/180*Math.PI) * Math.sin(i/180*Math.PI);
+      console.log(xx,zz);
+      add_sphere(xx*10,yy*10,zz*10);
+    }
+  }
+}
+,800)
+*/
