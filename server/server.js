@@ -7,12 +7,11 @@ getflight();
 
 function getflight(){
   var flight;
-  fs.readFile('../flight/6W703-105dec39.kml', 'utf8', function(err, contents) {
+  fs.readFile('../flight/5X219-106aa2cd.kml', 'utf8', function(err, contents) {
       flight = contents;
-      wss.on('connection', function connection(ws) {        
+      wss.on('connection', function connection(ws) {
         ws.send(flight);
       });
   });
-  
+
 }
- 
