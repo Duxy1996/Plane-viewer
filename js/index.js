@@ -53,6 +53,7 @@ function get_data(flight){
   flight = flight.replace(/<LineStyle>/g,"");
   flight = flight.replace(/<Folder>/g,"");
   flight = flight.replace(/<width>/g,"");
+  flight = flight.replace(/<color>/g,"");
   flight = flight.replace(/<MultiGeometry>/g,"");
   flight = flight.replace(/<LineString>/g,"");
   flight = flight.replace(/<tessellate>/g,"");
@@ -75,8 +76,7 @@ function get_data(flight){
   flight = flight.replace(/ffffffff/g,"");
   flight = flight.replace(/<coordinates>/g,"");
   flight = flight.replace(/<name>/g,"");
-  flight = flight.replace(/\n/g,"");
-  console.log(flight);
+  //flight = flight.replace(/\n/g,"");  
   flight = flight.split("![CDATA[");
   var i = 0;
   tramited_flight = [];
@@ -86,11 +86,10 @@ function get_data(flight){
     test = test.replace(/<description></g,"");
     test = test.replace(/]]><description>/g,"");
     test = test.replace(/f*/g,"");
-    test = test.split("\r");
-    test = test.filter(function(a){return a !== ""});
+    test = test.split("\n");
+    test = test.filter(function(a){return a !== ""});    
     if(test.length == 8){
       tramited_flight.push(test);
-      console.log(test);
     }
     
   }
