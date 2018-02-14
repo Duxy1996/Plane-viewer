@@ -10,10 +10,10 @@ function up_down(event) {
   x = camera.components.position.attrValue.x;
   var let = event.which || event.keyCode;
   if (let == 101){
-    camera.setAttribute('position', {x: x, y: (y+0.05), z: z});
+    camera.setAttribute('position', {x: x, y: (y+0.1), z: z});
   }
   if (let == 113){
-    camera.setAttribute('position', {x: x, y: (y-0.05), z: z});
+    camera.setAttribute('position', {x: x, y: (y-0.1), z: z});
   }
 
 }
@@ -87,33 +87,33 @@ function add_sphere(x,y,z){
 }
 
 var sent = 0;
-for(kk = 0; kk < 7; kk++){
-  setTimeout( function(){
-    var exampleSocket;
-    exampleSocket = new WebSocket("ws://localhost:8080","TPC");
-    exampleSocket.onopen = function (event) {
-      exampleSocket.send(sent);
-      sent++;
-    }
-    exampleSocket.onmessage = function (event) {
-      var flight_a = event.data;
-      if(flight_a == "None"){
-        alert("Error al recibir cosas");
-      } else{
-        flight = get_data(flight_a);
-        for(i = 0; i < flight.length; i = i + 5){
-          pos = flight[i][6].split(",");
-          alt = flight[i][0].replace(/,/g,"");
-          var latitud = pos[1];
-          var longitud = pos[0];
-          var xx = Math.cos(latitud/180*Math.PI) * Math.cos(longitud/180*Math.PI);
-          var yy = Math.sin(latitud/180*Math.PI);
-          var zz = Math.cos(latitud/180*Math.PI) * Math.sin(longitud/180*Math.PI);
-          add_sphere(xx*10,zz*10,yy*10);
-        }
+getplanes();
+function getplanes(kk){
+  var exampleSocket;
+  exampleSocket = new WebSocket("ws://localhost:8080","TPC");
+  exampleSocket.onopen = function (event) {
+    exampleSocket.send(sent);
+    sent++;
+  }
+  exampleSocket.onmessage = function (event) {
+    var flight_a = event.data;
+    if(flight_a == "None"){
+      alert("Se han cargado todos los vuelos disponibles");
+    } else{
+      flight = get_data(flight_a);
+      for(i = 0; i < flight.length; i = i + 2){
+        pos = flight[i][6].split(",");
+        alt = flight[i][0].replace(/,/g,"");
+        var latitud = pos[1];
+        var longitud = pos[0];
+        var xx = Math.cos(latitud/180*Math.PI) * Math.cos(longitud/180*Math.PI);
+        var yy = Math.sin(latitud/180*Math.PI);
+        var zz = Math.cos(latitud/180*Math.PI) * Math.sin(longitud/180*Math.PI);
+        add_sphere(xx*10,zz*10,yy*10);
       }
+      getplanes();
     }
-  },1000*kk);
+  }
 }
 
 
