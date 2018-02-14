@@ -55,7 +55,7 @@ function get_data(flight){
   flight = flight.replace(/ffffffff/g,"");
   flight = flight.replace(/<coordinates>/g,"");
   flight = flight.replace(/<name>/g,"");
-  flight = flight.replace(/\n/g,"");
+  //flight = flight.replace(/\n/g,"");
   flight = flight.split("![CDATA[");
   var i = 0;
   tramited_flight = [];
@@ -65,7 +65,7 @@ function get_data(flight){
     test = test.replace(/<description></g,"");
     test = test.replace(/]]><description>/g,"");
     test = test.replace(/f*/g,"");
-    test = test.split("\r");
+    test = test.split("\n");
     test = test.filter(function(a){return a !== ""});
     if(test.length == 8){
       tramited_flight.push(test);
@@ -81,37 +81,43 @@ function add_sphere(x,y,z){
     radius:0.01
   });
   sphere.setAttribute('position', {x: x, y: y, z: z});
-  sphere.setAttribute('material', 'color', '#C6B566');
+  sphere.setAttribute('material', 'color', 'red');
   sphere.setAttribute('shadow','cast','true');
   sceneEl.appendChild(sphere);
 }
 
-setTimeout(
-  function(){
-    for(i = 0; i < flight.length; i++){
-      pos = flight[i][6].split(",");
-      alt = flight[i][0].replace(/,/g,"");
-      //add_sphere((pos[0]-37)*800 - 800,alt/200,(pos[1]-55)*800 -300);
-      var ii = pos[0];
-      var j = pos[1];
-      var xx = Math.cos(j/180*Math.PI) * Math.cos(ii/180*Math.PI);
-      var yy = Math.sin(j/180*Math.PI);
-      var zz = Math.cos(j/180*Math.PI) * Math.sin(ii/180*Math.PI);
-      add_sphere(xx*10,yy*10,zz*10);
+var sent = 0;
+for(kk = 0; kk < 7; kk++){
+  setTimeout( function(){
+    var exampleSocket;
+    exampleSocket = new WebSocket("ws://localhost:8080","TPC");
+    exampleSocket.onopen = function (event) {
+      exampleSocket.send(sent);
+      sent++;
     }
-
+    exampleSocket.onmessage = function (event) {
+      var flight_a = event.data;
+      if(flight_a == "None"){
+        alert("Error al recibir cosas");
+      } else{
+        flight = get_data(flight_a);
+        for(i = 0; i < flight.length; i = i + 5){
+          pos = flight[i][6].split(",");
+          alt = flight[i][0].replace(/,/g,"");
+          var latitud = pos[1];
+          var longitud = pos[0];
+          var xx = Math.cos(latitud/180*Math.PI) * Math.cos(longitud/180*Math.PI);
+          var yy = Math.sin(latitud/180*Math.PI);
+          var zz = Math.cos(latitud/180*Math.PI) * Math.sin(longitud/180*Math.PI);
+          add_sphere(xx*10,zz*10,yy*10);
+        }
+      }
+    }
+  },1000*kk);
 }
-,800)
 
-var exampleSocket = new WebSocket("ws://localhost:8080","TPC");
-exampleSocket.onopen = function (event) {
-  exampleSocket.send("Here's some text that the server is urgently awaiting!");
-};
-exampleSocket.onmessage = function (event) {
-  var flight_a = event.data;
-  //console.log(flight_a);
-  flight = get_data(flight_a);
-}
+
+
 
 /*
 setTimeout(
@@ -121,8 +127,7 @@ function sphere_set(){
       var xx = Math.cos(j/180*Math.PI) * Math.cos(i/180*Math.PI);
       var yy = Math.sin(j/180*Math.PI);
       var zz = Math.cos(j/180*Math.PI) * Math.sin(i/180*Math.PI);
-      console.log(xx,zz);
-      add_sphere(xx*10,yy*10,zz*10);
+      add_sphere_blue(xx*10,yy*10,zz*10);
     }
   }
 }
