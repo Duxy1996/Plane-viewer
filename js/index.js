@@ -55,7 +55,7 @@ function get_data(flight){
   flight = flight.replace(/ffffffff/g,"");
   flight = flight.replace(/<coordinates>/g,"");
   flight = flight.replace(/<name>/g,"");
-  //flight = flight.replace(/\n/g,"");
+  flight = flight.replace(/\r\n/g,"\n");
   flight = flight.split("![CDATA[");
   var i = 0;
   tramited_flight = [];
@@ -66,6 +66,7 @@ function get_data(flight){
     test = test.replace(/]]><description>/g,"");
     test = test.replace(/f*/g,"");
     test = test.split("\n");
+    //test = test.split("\r");
     test = test.filter(function(a){return a !== ""});
     if(test.length == 8){
       tramited_flight.push(test);
@@ -101,7 +102,7 @@ function getplanes(kk){
       alert("Se han cargado todos los vuelos disponibles");
     } else{
       flight = get_data(flight_a);
-      for(i = 0; i < flight.length; i = i + 2){
+      for(i = 0; i < flight.length; i = i + 4){
         pos = flight[i][6].split(",");
         alt = flight[i][0].replace(/,/g,"");
         var latitud = pos[1];
