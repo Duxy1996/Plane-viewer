@@ -1,6 +1,15 @@
 var sceneEl = document.querySelector('a-scene');
 
 var flight = "";
+var global_group = document.createElement('a-entity');
+
+setTimeout( 
+  function(){
+    var tierra = document.getElementById('tierra');
+    global_group.appendChild(tierra);
+    global_group.setAttribute('rotation', {x: -67, y: 46, z: -28});
+    sceneEl.appendChild(global_group); 
+  }, 400);
 
 function up_down(event) {
   sceneEl = document.querySelector('a-scene');
@@ -15,7 +24,6 @@ function up_down(event) {
   if (let == 113){
     camera.setAttribute('position', {x: x, y: (y-0.1), z: z});
   }
-
 }
 
 function get_data(flight){
@@ -79,12 +87,12 @@ function add_sphere(x,y,z){
   sceneEl = document.querySelector('a-scene');
   var sphere = document.createElement('a-sphere');
   sphere.setAttribute('geometry', {
-    radius:0.01
+    radius:0.1
   });
   sphere.setAttribute('position', {x: x, y: y, z: z});
   sphere.setAttribute('material', 'color', 'red');
   sphere.setAttribute('shadow','cast','true');
-  sceneEl.appendChild(sphere);
+  global_group.appendChild(sphere); 
 }
 
 var sent = 0;
@@ -98,8 +106,8 @@ function getplanes(kk){
   }
   exampleSocket.onmessage = function (event) {
     var flight_a = event.data;
-    if(flight_a == "None"){
-      alert("Se han cargado todos los vuelos disponibles");
+    if(flight_a == "None"){             
+      alert("Se han cargado todos los vuelos disponibles");      
     } else{
       flight = get_data(flight_a);
       for(i = 0; i < flight.length; i = i + 4){
@@ -110,27 +118,9 @@ function getplanes(kk){
         var xx = Math.cos(latitud/180*Math.PI) * Math.cos(longitud/180*Math.PI);
         var yy = Math.sin(latitud/180*Math.PI);
         var zz = Math.cos(latitud/180*Math.PI) * Math.sin(longitud/180*Math.PI);
-        add_sphere(xx*10,zz*10,yy*10);
+        add_sphere(xx*20,zz*20,yy*20);
       }
       getplanes();
     }
   }
 }
-
-
-
-
-/*
-setTimeout(
-function sphere_set(){
-  for(i = 0; i < 360; i = i + 10){
-    for(j = -90; j <= 90; j = j + 10){
-      var xx = Math.cos(j/180*Math.PI) * Math.cos(i/180*Math.PI);
-      var yy = Math.sin(j/180*Math.PI);
-      var zz = Math.cos(j/180*Math.PI) * Math.sin(i/180*Math.PI);
-      add_sphere_blue(xx*10,yy*10,zz*10);
-    }
-  }
-}
-,800)
-*/
